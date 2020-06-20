@@ -1,0 +1,24 @@
+diff --git a/po/ko.po b/po/ko.po
+index de37242..1ec61f6 100644
+--- a/po/ko.po
++++ b/po/ko.po
+@@ -415,3 +415,6 @@ msgstr "취소(_C)"
+ #: src/screenshot-utils.c:725
+ msgid "Error loading the help page"
+ msgstr "도움말 페이지를 읽어들이는 데 오류"
++
++msgid "Select a folder to save"
++msgstr "저장할 폴더 열기"
+diff --git a/src/screenshot-dialog.c b/src/screenshot-dialog.c
+index d5befdc..4c8fa44 100644
+--- a/src/screenshot-dialog.c
++++ b/src/screenshot-dialog.c
+@@ -239,6 +239,8 @@ screenshot_dialog_new (GdkPixbuf              *screenshot,
+   dialog->filename_entry = GTK_WIDGET (gtk_builder_get_object (ui, "filename_entry"));
+   dialog->save_widget = GTK_WIDGET (gtk_builder_get_object (ui, "save_widget"));
+   gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (dialog->save_widget), current_folder);
++  gtk_file_chooser_button_set_title (GTK_FILE_CHOOSER_BUTTON (dialog->save_widget),
++                                     _("Select a folder to save"));
+   gtk_entry_set_text (GTK_ENTRY (dialog->filename_entry), current_name);
+ 
+   dialog->save_button = GTK_WIDGET (gtk_builder_get_object (ui, "save_button"));
