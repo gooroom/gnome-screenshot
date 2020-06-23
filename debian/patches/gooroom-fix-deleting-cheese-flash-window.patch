@@ -1,0 +1,97 @@
+diff --git a/src/cheese-flash.c b/src/cheese-flash.c
+index e0cfe4e..7907560 100644
+--- a/src/cheese-flash.c
++++ b/src/cheese-flash.c
+@@ -55,6 +55,7 @@ typedef struct
+   GtkWindow *window;
+   guint flash_timeout_tag;
+   guint fade_timeout_tag;
++  gdouble opacity;
+ } CheeseFlashPrivate;
+ 
+ static gboolean
+@@ -147,19 +148,21 @@ cheese_flash_opacity_fade (gpointer data)
+   CheeseFlash        *flash        = data;
+   CheeseFlashPrivate *flash_priv   = CHEESE_FLASH_GET_PRIVATE (flash);
+   GtkWidget          *flash_window = GTK_WIDGET (flash_priv->window);
+-  double              opacity      = gtk_widget_get_opacity (flash_window);
+ 
+   /* exponentially decrease */
+-  gtk_widget_set_opacity (flash_window, opacity * FLASH_FADE_FACTOR);
++  flash_priv->opacity *= FLASH_FADE_FACTOR;
+ 
+-  if (opacity <= FLASH_LOW_THRESHOLD)
++  gtk_widget_set_opacity (flash_window, flash_priv->opacity);
++
++  if (flash_priv->opacity <= FLASH_LOW_THRESHOLD)
+   {
+     /* the flasher has finished when we reach the quit value */
+-    gtk_widget_hide (flash_window);
+-    return FALSE;
++    flash_priv->fade_timeout_tag = 0;
++    g_object_unref (flash);
++    return G_SOURCE_REMOVE;
+   }
+ 
+-  return TRUE;
++  return G_SOURCE_CONTINUE;
+ }
+ 
+ static gboolean
+@@ -172,16 +175,15 @@ cheese_flash_start_fade (gpointer data)
+   /* If the screen is non-composited, just hide and finish up */
+   if (!gdk_screen_is_composited (gtk_window_get_screen (flash_window)))
+   {
+-    gtk_widget_hide (GTK_WIDGET (flash_window));
+-    return FALSE;
++    g_object_unref (self);
++    return G_SOURCE_REMOVE;
+   }
+ 
+   flash_priv->fade_timeout_tag = 
+-    g_timeout_add_full (G_PRIORITY_DEFAULT,
+-                        1000.0 / FLASH_ANIMATION_RATE,
+-                        cheese_flash_opacity_fade,
+-                        g_object_ref (self), g_object_unref);
+-  return FALSE;
++    g_timeout_add (1000.0 / FLASH_ANIMATION_RATE, cheese_flash_opacity_fade, self);
++
++  flash_priv->flash_timeout_tag = 0;
++  return G_SOURCE_REMOVE;
+ }
+ 
+ void
+@@ -196,16 +198,15 @@ cheese_flash_fire (CheeseFlash  *flash,
+   if (flash_priv->fade_timeout_tag > 0)
+     g_source_remove (flash_priv->fade_timeout_tag);
+ 
++  flash_priv->opacity = 1.0;
++
+   gtk_window_resize (flash_window, rect->width, rect->height);
+   gtk_window_move (flash_window, rect->x, rect->y);
+ 
+-  gtk_widget_set_opacity (GTK_WIDGET (flash_window), 0.99);
++  gtk_widget_set_opacity (GTK_WIDGET (flash_window), 1);
+   gtk_widget_show_all (GTK_WIDGET (flash_window));
+   flash_priv->flash_timeout_tag = 
+-    g_timeout_add_full (G_PRIORITY_DEFAULT,
+-                        FLASH_DURATION,
+-                        cheese_flash_start_fade,
+-                        g_object_ref (flash), g_object_unref);
++    g_timeout_add (FLASH_DURATION, cheese_flash_start_fade, flash);
+ }
+ 
+ CheeseFlash *
+diff --git a/src/screenshot-utils.c b/src/screenshot-utils.c
+index fb2166d..0a33bd5 100644
+--- a/src/screenshot-utils.c
++++ b/src/screenshot-utils.c
+@@ -324,8 +324,6 @@ screenshot_fallback_fire_flash (GdkWindow *window,
+ 
+   flash = cheese_flash_new ();
+   cheese_flash_fire (flash, &rect);
+-
+-  g_object_unref (flash);
+ }
+ 
+ GdkWindow *
