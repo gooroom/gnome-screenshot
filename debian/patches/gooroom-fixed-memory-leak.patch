@@ -1,0 +1,43 @@
+From 1e118c36c4b44f8bfb30f6a77f359da2ce1edf19 Mon Sep 17 00:00:00 2001
+From: Haeryong Jeong <jeong89@gooroom.kr>
+Date: Mon, 13 Jul 2020 16:56:37 +0900
+Subject: [PATCH] fixed memory leak
+
+Change-Id: I6076cee36f15f19f73c880e3f5c28af96b38d316
+---
+ src/screenshot-application.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/screenshot-application.c b/src/screenshot-application.c
+index 672c9ce..1fca509 100644
+--- a/src/screenshot-application.c
++++ b/src/screenshot-application.c
+@@ -112,7 +112,10 @@ screenshot_close_interactive_dialog (ScreenshotApplication *self)
+ {
+   ScreenshotDialog *dialog = self->priv->dialog;
+   save_folder_to_settings (self);
++
+   gtk_widget_destroy (dialog->dialog);
++  g_clear_object (&dialog->preview_image);
++
+   g_free (dialog);
+ }
+ 
+@@ -391,6 +394,14 @@ screenshot_back (ScreenshotApplication *self)
+ {
+   screenshot_close_interactive_dialog (self);
+   screenshot_show_interactive_dialog (self);
++
++  g_clear_object (&self->priv->screenshot);
++  g_free (self->priv->icc_profile_base64);
++  g_free (self->priv->save_uri);
++
++  self->priv->screenshot = NULL;
++  self->priv->icc_profile_base64 = NULL;
++  self->priv->save_uri = NULL;
+ }
+ 
+ static void
+-- 
+2.20.1
+
