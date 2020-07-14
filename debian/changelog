@@ -1,3 +1,12 @@
+gnome-screenshot (3.30.0-2+grm2u2) unstable; urgency=medium
+
+  [ Haeryong Jeong ]
+  * [f9b70505] Fixed memory leak
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Tue, 14 Jul 2020 14:19:42 +0900
+
 gnome-screenshot (3.30.0-2+grm2u1) unstable; urgency=medium
 
   [ cjheo ]
