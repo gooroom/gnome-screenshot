@@ -1,3 +1,12 @@
+gnome-screenshot (3.30.0-2+grm2u3) unstable; urgency=medium
+
+  [ subin.kim ]
+  * [21d5953b] [Bug:3138]Shows interaction dialog after save
+
+  [ Gooroom Autobuilder ]
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Thu, 01 Apr 2021 09:33:15 +0900
+
 gnome-screenshot (3.30.0-2+grm2u2) unstable; urgency=medium
 
   [ Haeryong Jeong ]
