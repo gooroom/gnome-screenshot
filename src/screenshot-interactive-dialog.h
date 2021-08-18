@@ -20,13 +20,16 @@
  * USA
  */
 
-#ifndef __SCREENSHOT_INTERACTIVE_DIALOG_H__
-#define __SCREENSHOT_INTERACTIVE_DIALOG_H__
+#pragma once
 
-#include <gtk/gtk.h>
+#include <handy.h>
 
-typedef void (*CaptureClickedCallback) (gpointer *user_data);
+G_BEGIN_DECLS
 
-GtkWidget *screenshot_interactive_dialog_new (CaptureClickedCallback f, gpointer user_data);
+#define SCREENSHOT_TYPE_INTERACTIVE_DIALOG (screenshot_interactive_dialog_get_type())
 
-#endif /* __SCREENSHOT_INTERACTIVE_DIALOG_H__ */
+G_DECLARE_FINAL_TYPE (ScreenshotInteractiveDialog, screenshot_interactive_dialog, SCREENSHOT, INTERACTIVE_DIALOG, HdyApplicationWindow)
+
+ScreenshotInteractiveDialog *screenshot_interactive_dialog_new (GtkApplication *app);
+
+G_END_DECLS

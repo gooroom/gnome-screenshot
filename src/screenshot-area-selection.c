@@ -140,7 +140,7 @@ select_area_key_press (GtkWidget               *window,
 
       gtk_main_quit ();
     }
- 
+
   return TRUE;
 }
 
@@ -197,7 +197,7 @@ create_select_window (void)
   gtk_window_move (GTK_WINDOW (window), -100, -100);
   gtk_window_resize (GTK_WINDOW (window), 10, 10);
   gtk_widget_show (window);
-  
+
   return window;
 }
 
@@ -226,11 +226,10 @@ emit_select_callback_in_idle (gpointer user_data)
 static void
 screenshot_select_area_x11_async (CallbackData *cb_data)
 {
-  GdkCursor *cursor;
+  g_autoptr(GdkCursor) cursor = NULL;
+  GdkDisplay *display;
   select_area_filter_data  data;
-  GdkDeviceManager *manager;
-  GdkDevice *pointer, *keyboard;
-  GdkGrabStatus res;
+  GdkSeat *seat;
 
   data.rect.x = 0;
   data.rect.y = 0;
@@ -245,47 +244,25 @@ screenshot_select_area_x11_async (CallbackData *cb_data)
   g_signal_connect (data.window, "button-release-event", G_CALLBACK (select_area_button_release), &data);
   g_signal_connect (data.window, "motion-notify-event", G_CALLBACK (select_area_motion_notify), &data);
 
-  cursor = gdk_cursor_new (GDK_CROSSHAIR);
-  manager = gdk_display_get_device_manager (gdk_display_get_default ());
-  pointer = gdk_device_manager_get_client_pointer (manager);
-  keyboard = gdk_device_get_associated_device (pointer);
+  display = gtk_widget_get_display (data.window);
+  cursor = gdk_cursor_new_for_display (display, GDK_CROSSHAIR);
+  seat = gdk_display_get_default_seat (display);
 
-  res = gdk_device_grab (pointer, gtk_widget_get_window (data.window),
-                         GDK_OWNERSHIP_NONE, FALSE,
-                         GDK_POINTER_MOTION_MASK |
-                         GDK_BUTTON_PRESS_MASK | 
-                         GDK_BUTTON_RELEASE_MASK,
-                         cursor, GDK_CURRENT_TIME);
-
-  if (res != GDK_GRAB_SUCCESS)
-    {
-      g_object_unref (cursor);
-      goto out;
-    }
-
-  res = gdk_device_grab (keyboard, gtk_widget_get_window (data.window),
-                         GDK_OWNERSHIP_NONE, FALSE,
-                         GDK_KEY_PRESS_MASK |
-                         GDK_KEY_RELEASE_MASK,
-                         NULL, GDK_CURRENT_TIME);
-  if (res != GDK_GRAB_SUCCESS)
-    {
-      gdk_device_ungrab (pointer, GDK_CURRENT_TIME);
-      g_object_unref (cursor);
-      goto out;
-    }
+  gdk_seat_grab (seat,
+                 gtk_widget_get_window (data.window),
+                 GDK_SEAT_CAPABILITY_ALL,
+                 FALSE,
+                 cursor,
+                 NULL,
+                 NULL,
+                 NULL);
 
   gtk_main ();
 
-  gdk_device_ungrab (pointer, GDK_CURRENT_TIME);
-  gdk_device_ungrab (keyboard, GDK_CURRENT_TIME);
+  gdk_seat_ungrab (seat);
 
   gtk_widget_destroy (data.window);
-  g_object_unref (cursor);
 
-  gdk_flush ();
-
- out:
   cb_data->aborted = data.aborted;
   cb_data->rectangle = data.rect;
 
@@ -302,15 +279,14 @@ select_area_done (GObject *source_object,
                   gpointer user_data)
 {
   CallbackData *cb_data = user_data;
-  GError *error = NULL;
-  GVariant *ret;
+  g_autoptr(GError) error = NULL;
+  g_autoptr(GVariant) ret = NULL;
 
   ret = g_dbus_connection_call_finish (G_DBUS_CONNECTION (source_object), res, &error);
   if (error != NULL)
     {
       if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
-          g_error_free (error);
           cb_data->aborted = TRUE;
           g_idle_add (emit_select_callback_in_idle, cb_data);
           return;
@@ -318,7 +294,6 @@ select_area_done (GObject *source_object,
 
       g_message ("Unable to select area using GNOME Shell's builtin screenshot "
                  "interface, resorting to fallback X11.");
-      g_error_free (error);
 
       screenshot_select_area_x11_async (cb_data);
       return;
@@ -329,7 +304,6 @@ select_area_done (GObject *source_object,
                  &cb_data->rectangle.y,
                  &cb_data->rectangle.width,
                  &cb_data->rectangle.height);
-  g_variant_unref (ret);
 
   g_idle_add (emit_select_callback_in_idle, cb_data);
 }

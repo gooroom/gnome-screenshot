@@ -1,5 +1,3 @@
-gnome = import('gnome')
-
 sources = [
   'gnome-screenshot.c',
 
@@ -7,57 +5,40 @@ sources = [
 
   'screenshot-application.c',
   'screenshot-area-selection.c',
+  'screenshot-backend.c',
+  'screenshot-backend-shell.c',
+  'screenshot-backend-x11.c',
   'screenshot-config.c',
   'screenshot-dialog.c',
   'screenshot-filename-builder.c',
   'screenshot-interactive-dialog.c',
-  'screenshot-shadow.c',
   'screenshot-utils.c',
 ]
 
-resources = gnome.compile_resources('screenshot-resources',
-                                    'gnome-screenshot.gresource.xml',
-                                    source_dir: '.',
-                                    c_name: 'screenshot')
+include_directories = [
+  root_inc,
+  include_directories('.')
+]
 
-executable('gnome-screenshot', sources + resources,
-           include_directories: [ root_inc, include_directories('.') ],
-           dependencies: [ mathlib_dep, x11_dep, glib_dep, gtk_dep, canberra_dep ],
-           c_args: [
-             '-DLOCALEDIR="@0@"'.format(gnome_screenshot_localedir),
-             '-DGLIB_DISABLE_DEPRECATION_WARNINGS',
-             '-DGDK_DISABLE_DEPRECATION_WARNINGS',
-           ],
-           install: true)
+dependencies = [
+  mathlib_dep,
+  x11_dep,
+  xext_dep,
+  glib_dep,
+  gtk_dep,
+  libhandy_dep,
+  canberra_dep
+]
 
-i18n.merge_file('desktop',
-                type: 'desktop',
-                input: 'org.gnome.Screenshot.desktop.in',
-                output: 'org.gnome.Screenshot.desktop',
-                po_dir: join_paths(meson.current_source_dir(), '../po'),
-                install: true,
-                install_dir: gnome_screenshot_appsdir)
+c_args = [
+  '-DLOCALEDIR="@0@"'.format(gnome_screenshot_localedir),
+]
 
-i18n.merge_file('desktop',
-                input: 'org.gnome.Screenshot.metainfo.xml.in',
-                output: 'org.gnome.Screenshot.metainfo.xml',
-                po_dir: join_paths(meson.current_source_dir(), '../po'),
-                install: true,
-                install_dir: gnome_screenshot_appdatadir)
-
-service_conf = configuration_data ()
-service_conf.set('bindir', gnome_screenshot_bindir)
-configure_file(input: 'org.gnome.Screenshot.service.in',
-               output: 'org.gnome.Screenshot.service',
-               configuration: service_conf,
-               install: true,
-               install_dir: gnome_screenshot_servicesdir)
-
-install_data('org.gnome.gnome-screenshot.gschema.xml',
-             install_dir: gnome_screenshot_schemadir)
-
-install_data('gnome-screenshot.1',
-             install_dir: join_paths(get_option('mandir'), 'man1'))
-
-install_data('gnome-screenshot.convert',
-             install_dir: join_paths(gnome_screenshot_datadir, 'GConf', 'gsettings'))
+executable(
+  'gnome-screenshot',
+  sources + resources,
+  include_directories: include_directories,
+  dependencies: dependencies,
+  c_args: c_args,
+  install: true
+)
