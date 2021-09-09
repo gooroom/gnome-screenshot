@@ -1,0 +1,31 @@
+diff --git a/src/screenshot-application.c b/src/screenshot-application.c
+index 4cc64c8..3b5c4a8 100644
+--- a/src/screenshot-application.c
++++ b/src/screenshot-application.c
+@@ -109,7 +109,11 @@ screenshot_close_interactive_dialog (ScreenshotApplication *self)
+ {
+   ScreenshotDialog *dialog = self->dialog;
+   save_folder_to_settings (self);
++
+   gtk_widget_destroy (GTK_WIDGET (dialog));
++  //g_clear_object (&dialog->preview_image);
++
++  //g_free (dialog);
+ }
+ 
+ static void
+@@ -360,6 +364,14 @@ screenshot_back (ScreenshotApplication *self)
+ {
+   screenshot_close_interactive_dialog (self);
+   screenshot_show_interactive_dialog (self);
++
++  g_clear_object (&self->screenshot);
++  g_free (self->icc_profile_base64);
++  g_free (self->save_uri);
++
++  self->screenshot = NULL;
++  self->icc_profile_base64 = NULL;
++  self->save_uri = NULL;
+ }
+ 
+ static void

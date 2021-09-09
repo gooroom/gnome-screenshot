@@ -1,0 +1,22 @@
+diff --git a/src/screenshot-application.c b/src/screenshot-application.c
+index 4cc64c8..2396035 100644
+--- a/src/screenshot-application.c
++++ b/src/screenshot-application.c
+@@ -45,6 +45,7 @@
+ 
+ static void screenshot_save_to_file (ScreenshotApplication *self);
+ static void screenshot_show_interactive_dialog (ScreenshotApplication *self);
++static void screenshot_back (ScreenshotApplication *self);
+ 
+ struct _ScreenshotApplication
+ {
+@@ -119,7 +120,8 @@ save_pixbuf_handle_success (ScreenshotApplication *self)
+ 
+   if (screenshot_config->interactive)
+     {
+-      screenshot_close_interactive_dialog (self);
++      //screenshot_close_interactive_dialog (self);
++      screenshot_back (self);
+     }
+   else
+     {

@@ -1,0 +1,27 @@
+diff --git a/po/ko.po b/po/ko.po
+index f301b5f..96d14d6 100644
+--- a/po/ko.po
++++ b/po/ko.po
+@@ -341,6 +341,9 @@ msgstr "스크린샷, %s - %d.%s"
+ msgid "Error loading the help page"
+ msgstr "도움말을 불러오는 동안 오류가 발생했습니다"
+ 
++msgid "Select a folder to save"
++msgstr "저장할 폴더 열기"
++
+ #~ msgid "Include Border"
+ #~ msgstr "테두리 포함"
+ 
+diff --git a/src/screenshot-dialog.c b/src/screenshot-dialog.c
+index 43714b3..063c6dd 100644
+--- a/src/screenshot-dialog.c
++++ b/src/screenshot-dialog.c
+@@ -273,6 +273,8 @@ screenshot_dialog_new (GtkApplication *app,
+   gtk_widget_realize (GTK_WIDGET (self));
+ 
+   gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (self->save_widget), current_folder);
++  gtk_file_chooser_button_set_title (GTK_FILE_CHOOSER_BUTTON (self->save_widget),
++                                     _("Select a folder to save"));
+   gtk_entry_set_text (GTK_ENTRY (self->filename_entry), current_name);
+ 
+   /* setup dnd */

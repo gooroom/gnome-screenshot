@@ -1,0 +1,24 @@
+diff --git a/src/cheese-flash.c b/src/cheese-flash.c
+index 3f6e399..8d1ccbb 100644
+--- a/src/cheese-flash.c
++++ b/src/cheese-flash.c
+@@ -125,6 +125,8 @@ cheese_flash_opacity_fade (gpointer data)
+   /* exponentially decrease */
+   priv->opacity *= FLASH_FADE_FACTOR;
+ 
++  gtk_widget_set_opacity (flash_window, priv->opacity);
++
+   if (priv->opacity <= FLASH_LOW_THRESHOLD)
+     {
+       /* the flasher has finished when we reach the quit value */
+@@ -132,10 +134,6 @@ cheese_flash_opacity_fade (gpointer data)
+       gtk_widget_destroy (flash_window);
+       return G_SOURCE_REMOVE;
+     }
+-  else
+-    {
+-      gtk_widget_set_opacity (flash_window, priv->opacity);
+-    }
+ 
+   return G_SOURCE_CONTINUE;
+ }
