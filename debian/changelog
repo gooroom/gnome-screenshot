@@ -1,3 +1,10 @@
+gnome-screenshot (3.38.0-1+grm3u1) unstable; urgency=medium
+
+  [ subin.kim ]
+  * [f78d4d3e] gooroom-3.0 rebase
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Sat, 04 Dec 2021 19:03:40 +0900
+
 gnome-screenshot (3.38.0-1) unstable; urgency=medium
 
   * New upstream release
