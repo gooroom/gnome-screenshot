@@ -1,0 +1,62 @@
+diff --git a/data/ui/screenshot-interactive-dialog.ui b/data/ui/screenshot-interactive-dialog.ui
+index e8670da..cb41252 100644
+--- a/data/ui/screenshot-interactive-dialog.ui
++++ b/data/ui/screenshot-interactive-dialog.ui
+@@ -232,10 +232,6 @@
+   </object>
+   <menu id="primary_menu">
+     <section>
+-      <item>
+-        <attribute name="action">app.help</attribute>
+-        <attribute name="label" translatable="yes">_Help</attribute>
+-      </item>
+       <item>
+         <attribute name="action">app.about</attribute>
+         <attribute name="label" translatable="yes">_About Screenshot</attribute>
+diff --git a/src/screenshot-interactive-dialog.c b/src/screenshot-interactive-dialog.c
+index a7b15ba..21d7b58 100644
+--- a/src/screenshot-interactive-dialog.c
++++ b/src/screenshot-interactive-dialog.c
+@@ -44,6 +44,7 @@ struct _ScreenshotInteractiveDialog
+   GtkAdjustment *delay_adjustment;
+   GtkWidget *window;
+   GtkWidget *selection;
++  GtkWidget *primary_menu;
+ };
+ 
+ G_DEFINE_TYPE (ScreenshotInteractiveDialog, screenshot_interactive_dialog, HDY_TYPE_APPLICATION_WINDOW)
+@@ -114,6 +115,17 @@ capture_button_clicked_cb (GtkButton                   *button,
+   g_signal_emit (self, signals[SIGNAL_CAPTURE], 0);
+ }
+ 
++static void
++screenshot_dialog_check_help (ScreenshotInteractiveDialog *self){
++
++  if (g_file_test ("/usr/bin/yelp", G_FILE_TEST_EXISTS)) {
++    GMenuItem *item;
++
++    item = g_menu_item_new (_("_Help"), "app.help");
++    g_menu_append_item (self->primary_menu, item);
++  }
++}
++
+ static void
+ screenshot_interactive_dialog_class_init (ScreenshotInteractiveDialogClass *klass)
+ {
+@@ -136,6 +148,7 @@ screenshot_interactive_dialog_class_init (ScreenshotInteractiveDialogClass *klas
+   gtk_widget_class_bind_template_child (widget_class, ScreenshotInteractiveDialog, delay_adjustment);
+   gtk_widget_class_bind_template_child (widget_class, ScreenshotInteractiveDialog, window);
+   gtk_widget_class_bind_template_child (widget_class, ScreenshotInteractiveDialog, selection);
++  gtk_widget_class_bind_template_child (widget_class, ScreenshotInteractiveDialog, primary_menu);
+   gtk_widget_class_bind_template_callback (widget_class, screen_toggled_cb);
+   gtk_widget_class_bind_template_callback (widget_class, window_toggled_cb);
+   gtk_widget_class_bind_template_callback (widget_class, selection_toggled_cb);
+@@ -159,6 +172,8 @@ screenshot_interactive_dialog_init (ScreenshotInteractiveDialog *self)
+   gtk_switch_set_active (GTK_SWITCH (self->pointer), screenshot_config->include_pointer);
+ 
+   gtk_adjustment_set_value (self->delay_adjustment, (gdouble) screenshot_config->delay);
++
++  screenshot_dialog_check_help(GTK_WIDGET(self));
+ }
+ 
+ ScreenshotInteractiveDialog *

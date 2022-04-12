@@ -2,3 +2,4 @@ gooroom-change-save-dialog-title.patch
 gooroom-fix-deleting-cheese-flash-window.patch
 gooroom-fixed-memory-leak.patch
 gooroom-show-interaction-dialog-after-save.patch
+gooroom-make-help-menu-flexible.patch
