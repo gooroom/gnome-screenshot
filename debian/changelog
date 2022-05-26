@@ -1,3 +1,10 @@
+gnome-screenshot (3.38.0-1+grm3u2) unstable; urgency=medium
+
+  [ boyeon.choi ]
+  * [31f33293] [Bug:4375] Made help menu flexible
+
+ -- Gooroom Autobuilder <jenkins@gooroom.kr>  Thu, 26 May 2022 18:08:54 +0900
+
 gnome-screenshot (3.38.0-1+grm3u1) unstable; urgency=medium
 
   [ subin.kim ]
